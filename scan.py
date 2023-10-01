@@ -13,8 +13,12 @@ def menu():
     choice = input("Enter choice: ")
     if choice == "1":
         scan()
+        menu()
     elif choice == "2":
         exit()
     else:
         print("Invalid choice")
         menu()
+
+
+menu()
