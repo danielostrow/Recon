@@ -1,10 +1,12 @@
 import subprocess
 
+
 def scan():
     print("Scanning...")
-subprocess.call(["arp", "-a"])
-subprocess.call(["arp", "-a"])
-# Store output IPv4 addresses in a list to be used later
+    subprocess.call(["arp", "-a"])
+    subprocess.call(["arp", "-a"])
+    # Store output IPv4 addresses in a list to be used later
+
 
 def menu():
     print("1. Scan")
