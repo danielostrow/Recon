@@ -11,6 +11,28 @@ def scan():
     # Store output IPv4 addresses in a list to be used later as a list of strings
 
 
+def grab_banner(target_ip, port):
+    try:
+        # Create a TCP SYN packet
+        tcp_syn_packet = IP(dst=target_ip) / TCP(dport=port, flags="S")
+
+        # Send the SYN packet and wait for a response
+        response = sr1(tcp_syn_packet, timeout=1, verbose=0)
+
+        if response and response.haslayer(TCP) and response[TCP].flags == "SA":
+            # Send an additional request to grab the banner
+            tcp_request = IP(dst=target_ip) / TCP(dport=port, flags="A")
+            response = sr1(tcp_request, timeout=1, verbose=0)
+
+            if response and response.haslayer(TCP) and response[TCP].payload:
+                banner = response[TCP].payload.load.decode('utf-8', errors='ignore')
+                return banner.strip()
+    except Exception as e:
+        pass
+
+    return None
+
+
 def remote_scan():
     target_ip = input("Enter target IP:\t")
     start_port = int(input("Enter start port:\t"))
@@ -19,20 +41,27 @@ def remote_scan():
     # Create a TCP SYN packet
     tcp_syn_packet = IP(dst=target_ip) / TCP(flags="S")
 
-    # Loop through the range of ports and send the TCP SYN packet
-    open_ports = []
+    # Initialize an empty list to store open ports and banners
+    open_ports_and_banners = []
+
     for port in tqdm(range(start_port, end_port + 1), desc='Scanning ports'):
-        # Set the destination port for the TCP SYN packet
         tcp_syn_packet[TCP].dport = port
 
         # Send the packet and wait for a response
         response = sr1(tcp_syn_packet, timeout=1, verbose=0)
 
-        # Check the response and print the result
+        # Check the response and add open ports and banners to the list
         if response and response.haslayer(TCP) and response[TCP].flags == "SA":
-            open_ports.append(port)
+            # Banner grabbing
+            banner = grab_banner(target_ip, port)
+            open_ports_and_banners.append((port, banner))
 
-    print(f"Open ports: {open_ports}")
+    if not open_ports_and_banners:
+        print("No open ports found.")
+    else:
+        print("Open ports and banners:")
+        for port, banner in open_ports_and_banners:
+            print(f"{port}:\n{banner}")
 
 
 def menu():
