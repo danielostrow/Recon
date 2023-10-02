@@ -68,14 +68,14 @@ def menu():
     print("1. Scan")
     print("2. Remote Scan")
     print("3. Exit")
-    choice = input("Enter choice: ")
-    if choice == "1":
+    selection = input("Enter choice: ")
+    if selection == "1":
         scan()
         menu()
-    elif choice == "2":
+    elif selection == "2":
         remote_scan()
         menu()
-    elif choice == "3":
+    elif selection == "3":
         exit()
     else:
         print("Invalid choice")
